@@ -1135,11 +1135,11 @@ CM.Disp.AddMenuStats = function(title) {
 	
 	stats.appendChild(header('Lucky Cookies', 'Lucky'));
 	if (CM.Config.StatsPref.Lucky) {
-		var luckyColor = ((Game.cookies + CM.Disp.GetWrinkConfigBank()) < CM.Cache.Lucky) ? CM.Disp.colorRed : CM.Disp.colorGreen;
-		var luckyTime = ((Game.cookies + CM.Disp.GetWrinkConfigBank()) < CM.Cache.Lucky) ? CM.Disp.FormatTime((CM.Cache.Lucky - (Game.cookies + CM.Disp.GetWrinkConfigBank())) / CM.Disp.GetCPS()) : '';
-		var luckyColorFrenzy = ((Game.cookies + CM.Disp.GetWrinkConfigBank()) < CM.Cache.LuckyFrenzy) ? CM.Disp.colorRed : CM.Disp.colorGreen;
-		var luckyTimeFrenzy = ((Game.cookies + CM.Disp.GetWrinkConfigBank()) < CM.Cache.LuckyFrenzy) ? CM.Disp.FormatTime((CM.Cache.LuckyFrenzy - (Game.cookies + CM.Disp.GetWrinkConfigBank())) / CM.Disp.GetCPS()) : '';
-		var luckyCurBase = Math.min((Game.cookies + CM.Disp.GetWrinkConfigBank()) * 0.15, CM.Cache.NoGoldSwitchCookiesPS * 60 * 15) + 13;
+		var luckyColor = ((Game.cookies /* + CM.Disp.GetWrinkConfigBank() */) < CM.Cache.Lucky) ? CM.Disp.colorRed : CM.Disp.colorGreen;
+		var luckyTime = ((Game.cookies /* + CM.Disp.GetWrinkConfigBank() */) < CM.Cache.Lucky) ? CM.Disp.FormatTime((CM.Cache.Lucky - (Game.cookies /* + CM.Disp.GetWrinkConfigBank() */)) / CM.Disp.GetCPS()) : '';
+		var luckyColorFrenzy = ((Game.cookies /* + CM.Disp.GetWrinkConfigBank() */) < CM.Cache.LuckyFrenzy) ? CM.Disp.colorRed : CM.Disp.colorGreen;
+		var luckyTimeFrenzy = ((Game.cookies /* + CM.Disp.GetWrinkConfigBank() */) < CM.Cache.LuckyFrenzy) ? CM.Disp.FormatTime((CM.Cache.LuckyFrenzy - (Game.cookies /* + CM.Disp.GetWrinkConfigBank() */)) / CM.Disp.GetCPS()) : '';
+		var luckyCurBase = Math.min((Game.cookies /* + CM.Disp.GetWrinkConfigBank() */) * 0.15, CM.Cache.NoGoldSwitchCookiesPS * 60 * 15) + 13;
 		var luckyRewardMax = CM.Cache.LuckyReward;
 		var luckyRewardMaxWrath = CM.Cache.LuckyReward;
 		var luckyRewardFrenzyMax = CM.Cache.LuckyRewardFrenzy;
@@ -1630,6 +1630,7 @@ CM.Disp.UpdateTooltip = function() {
 		}
 		var price;
 		var bonus;
+		var increase;
 		if (CM.Disp.tooltipType == 'b') {
 			var target = '';
 			if (Game.buyMode == 1 && Game.buyBulk == 10) {
@@ -1660,12 +1661,12 @@ CM.Disp.UpdateTooltip = function() {
 				l('CMTooltipPP').className = CM.Disp.colorTextPre + CM.Cache.Upgrades[Game.UpgradesInStore[CM.Disp.tooltipName].name].color;
 			}
 		}
+		increase = Math.round(bonus / Game.cookiesPs * 10000) / 10000;
 		if (CM.Config.Tooltip == 1 && (CM.Disp.tooltipType != 'b' || Game.buyMode == 1)) {
 			l('CMTooltipIncome').textContent = Beautify(bonus, 2);
 			
-			var increase = Math.round(bonus / Game.cookiesPs * 10000);
 			if (isFinite(increase) && increase != 0) {
-				l('CMTooltipIncome').textContent += ' (' + (increase / 100) + '% of income)';
+				l('CMTooltipIncome').textContent += ' (' + (increase * 100) + '% of income)';
 			}
 		
 			var timeColor = CM.Disp.GetTimeColor(price, (Game.cookies + CM.Disp.GetWrinkConfigBank()), CM.Disp.GetCPS());
@@ -1680,8 +1681,10 @@ CM.Disp.UpdateTooltip = function() {
 				bonusNoFren /= CM.Sim.getCPSBuffMult();
 				warn += ((bonusNoFren * 60 * 15) / 0.15);
 			}
+			warn += warn * increase; // Calculate warning and caution based on the increased cookies per second, not the current rate.
 			var caut = warn * 7;
-			var amount = (Game.cookies + CM.Disp.GetWrinkConfigBank()) - price;
+			var amount = Game.cookies - price;
+			//var amount = (Game.cookies + CM.Disp.GetWrinkConfigBank()) - price;
 			if ((amount < warn || amount < caut) && (CM.Disp.tooltipType != 'b' || Game.buyMode == 1)) {
 				if (CM.Config.ToolWarnCautPos == 0) {
 					CM.Disp.TooltipWarnCaut.style.right = '0px';
